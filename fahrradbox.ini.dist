@@ -1,0 +1,13 @@
+# This is a sample configuration file. Copy it to fahrradbox.ini and change
+# the settings to your needs.
+
+[url]
+url = https://www.example.com
+
+[mqtt]
+host = iot.eclipse.org
+
+[topics]
+status = fahrradbox/{nr}/belegt/status
+date = fahrradbox/{nr}/belegt/datum
+raw = fahrradbox/{nr}/belegt/raw
