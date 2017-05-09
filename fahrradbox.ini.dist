@@ -1,8 +1,9 @@
 # This is a sample configuration file. Copy it to fahrradbox.ini and change
 # the settings to your needs.
 
-[url]
+[base]
 url = https://www.example.com
+wait_time = 60
 
 [mqtt]
 host = iot.eclipse.org

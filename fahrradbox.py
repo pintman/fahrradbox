@@ -1,6 +1,8 @@
 from html.parser import HTMLParser
 import urllib.request
 import configparser
+import time
+
 
 class Boxinfo:
     def __init__(self, boxinfo_string):
@@ -39,25 +41,35 @@ class FBoxParser(HTMLParser):
             #print(" data:", data, ".")
             bi = Boxinfo(data)
             self.boxinfos.append(bi)
-            
+
+    def error(self, message):
+        pass
+
 
 def main():
+    # read config file
     config = configparser.ConfigParser()
     config.read("fahrradbox.ini")
 
-    parser = FBoxParser()
-    with urllib.request.urlopen(config["url"]["url"]) as response:
-        html = str(response.read(), encoding="utf8")
-        parser.feed(html)
+    sleeptime = config.getint("base", "wait_time")
 
-    topic_stat = config["topics"]["status"]
-    topic_date = config["topics"]["date"]
-    topic_raw = config["topics"]["raw"]
+    while True:
+        # parse website
+        parser = FBoxParser()
+        with urllib.request.urlopen(config["base"]["url"]) as response:
+            html = str(response.read(), encoding="utf8")
+            parser.feed(html)
 
-    for bi in parser.boxinfos:
-        print(topic_stat.format(nr=bi.num), bi.status)
-        print(topic_date.format(nr=bi.num), bi.date)
-        print(topic_raw.format(nr=bi.num), bi.raw)
+        topic_stat = config["topics"]["status"]
+        topic_date = config["topics"]["date"]
+        topic_raw = config["topics"]["raw"]
+
+        for bi in parser.boxinfos:
+            print(topic_stat.format(nr=bi.num), bi.status)
+            print(topic_date.format(nr=bi.num), bi.date)
+            print(topic_raw.format(nr=bi.num), bi.raw)
+
+        time.sleep(sleeptime)
 
 if __name__ == "__main__":
     main()
