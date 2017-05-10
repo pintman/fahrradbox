@@ -2,7 +2,7 @@ from html.parser import HTMLParser
 import urllib.request
 import configparser
 import time
-
+import paho.mqtt.client as mqtt
 
 class Boxinfo:
     def __init__(self, boxinfo_string):
@@ -21,7 +21,6 @@ class Boxinfo:
         self.date = boxinfo_string.split("seit dem ")[1]
         # 'in Nutzung' oder 'frei'
         self.status = 0 if "frei" in boxinfo_string else 1
-        #print("num:", box_num, "dat:", dat, "stat:", status)
 
 
 class FBoxParser(HTMLParser):
@@ -46,12 +45,38 @@ class FBoxParser(HTMLParser):
         pass
 
 
+class MqttPublisher:
+    def __init__(self, topics, host, port=1883):
+        """Create a publisher.
+        topics is a dictionary that contains topic templates: status, date, and raw.
+        """
+        assert len(topics) == 3
+        self.topics = topics
+        self.client = mqtt.Client()
+        print("connecting to", host, port)
+        self.client.connect(host=host, port=port)
+
+    def publish(self, boxinfo):
+        assert "status" in self.topics
+        assert "date" in self.topics
+        assert "raw" in self.topics
+
+        self.client.publish(self.topics["status"].format(nr=boxinfo.num),
+                            boxinfo.status, retain=True)
+        self.client.publish(self.topics["date"].format(nr=boxinfo.num),
+                            boxinfo.date, retain=True)
+        self.client.publish(self.topics["raw"].format(nr=boxinfo.num),
+                            boxinfo.raw, retain=True)
+
+
 def main():
     # read config file
+    print("reading config")
     config = configparser.ConfigParser()
     config.read("fahrradbox.ini")
 
     sleeptime = config.getint("base", "wait_time")
+    publisher = MqttPublisher(config["topics"], config["mqtt"]["host"])
 
     while True:
         # parse website
@@ -60,14 +85,8 @@ def main():
             html = str(response.read(), encoding="utf8")
             parser.feed(html)
 
-        topic_stat = config["topics"]["status"]
-        topic_date = config["topics"]["date"]
-        topic_raw = config["topics"]["raw"]
-
         for bi in parser.boxinfos:
-            print(topic_stat.format(nr=bi.num), bi.status)
-            print(topic_date.format(nr=bi.num), bi.date)
-            print(topic_raw.format(nr=bi.num), bi.raw)
+            publisher.publish(bi)
 
         time.sleep(sleeptime)
 
