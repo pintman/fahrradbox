@@ -1,0 +1,37 @@
+---
+- hosts: fahrradbox_sensor
+  vars:
+    repo_dest: /home/administrator/proj/fahrradbox
+    python_venv: '{{ repo_dest }}/venv'
+
+  tasks:
+
+  - name: update/checkout git repo
+    git:
+      repo: 'https://github.com/pintman/fahrradbox.git'
+      dest: '{{ repo_dest }}'
+      version: master
+
+  - name: copy local config file
+    copy:
+      src: fahrradbox.ini
+      dest: '{{ repo_dest }}'
+
+  - name: install dependencies from requirements file in repo
+    pip:
+      requirements: '{{ repo_dest }}/requirements.txt'
+      virtualenv: '{{ python_venv }}'
+      virtualenv_python: python3
+
+  - name: copy supervisor configuration file
+    become: yes
+    copy:
+      src: service/supervisor.conf
+      dest: /etc/supervisor/conf.d/fahrradbox.conf
+
+  - name: restart service
+    become: yes
+    supervisorctl:
+      name: fahrradbox
+      state: restarted
+
