@@ -9,6 +9,6 @@ wait_time = 60
 host = iot.eclipse.org
 
 [topics]
-status = fahrradbox/{nr}/belegt
-date = fahrradbox/{nr}/datum
-raw = fahrradbox/{nr}/raw
+status = ebike_garage/{nr}/belegt
+date = ebike_garage/{nr}/datum
+raw = ebike_garage/{nr}/raw
