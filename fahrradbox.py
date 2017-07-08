@@ -3,6 +3,7 @@ import urllib.request
 import configparser
 import time
 import paho.mqtt.client as mqtt
+import logging
 
 
 class Boxinfo:
@@ -54,7 +55,7 @@ class MqttPublisher:
         assert len(topics) == 3
         self.topics = topics
         self.client = mqtt.Client()
-        print("connecting to", host, port)
+        logging.info("connecting to %s:%s", host, port)
         self.client.connect(host=host, port=port)
 
     def publish(self, boxinfo):
@@ -72,7 +73,7 @@ class MqttPublisher:
 
 def main():
     # read config file
-    print("reading config")
+    logging.debug("reading config")
     config = configparser.ConfigParser()
     config.read("fahrradbox.ini")
 
@@ -92,4 +93,5 @@ def main():
         time.sleep(sleeptime)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()
