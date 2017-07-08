@@ -20,7 +20,7 @@ class Boxinfo:
         # seit dem 09.05.2017, 13:05:09 .
         self.date = boxinfo_string.split("seit dem ")[1]
         # 'in Nutzung' oder 'frei'
-        self.status = 0 if "frei" in boxinfo_string else 1
+        self.belegt = 0 if "frei" in boxinfo_string else 1
 
 
 class FBoxParser(HTMLParser):
@@ -57,12 +57,12 @@ class MqttPublisher:
         self.client.connect(host=host, port=port)
 
     def publish(self, boxinfo):
-        assert "status" in self.topics
+        assert "belegt" in self.topics
         assert "date" in self.topics
         assert "raw" in self.topics
 
-        self.client.publish(self.topics["status"].format(nr=boxinfo.num),
-                            boxinfo.status, retain=True)
+        self.client.publish(self.topics["belegt"].format(nr=boxinfo.num),
+                            boxinfo.belegt, retain=True)
         self.client.publish(self.topics["date"].format(nr=boxinfo.num),
                             boxinfo.date, retain=True)
         self.client.publish(self.topics["raw"].format(nr=boxinfo.num),
