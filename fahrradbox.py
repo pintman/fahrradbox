@@ -4,6 +4,7 @@ import configparser
 import time
 import paho.mqtt.client as mqtt
 
+
 class Boxinfo:
     def __init__(self, boxinfo_string):
         """Convert string into object.
@@ -37,7 +38,6 @@ class FBoxParser(HTMLParser):
 
     def handle_data(self, data):
         if self.in_tag == "li":
-            #print(" data:", data, ".")
             bi = Boxinfo(data)
             self.boxinfos.append(bi)
 
@@ -48,7 +48,8 @@ class FBoxParser(HTMLParser):
 class MqttPublisher:
     def __init__(self, topics, host, port=1883):
         """Create a publisher.
-        topics is a dictionary that contains topic templates: status, date, and raw.
+        topics is a dictionary that contains topic templates: status, date,
+        and raw.
         """
         assert len(topics) == 3
         self.topics = topics
