@@ -23,6 +23,11 @@
       virtualenv: '{{ python_venv }}'
       virtualenv_python: python3
 
+  - name: install supervisor package
+    become: yes
+    apt:
+      name: supervisor
+    
   - name: copy supervisor configuration file
     become: yes
     copy:
